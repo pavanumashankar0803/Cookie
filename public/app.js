@@ -439,6 +439,16 @@
   });
   $('btn-export').addEventListener('click', () => { location.href = api('profile/export'); });
 
+    window.addEventListener('saveCookies', (ev) => {
+    console.log('[cookie-banner] saveCookies', ev.detail);
+    toast('Cookie banner: consent saved', 'warn');
+    setTimeout(() => refresh(), 500);
+  });
+  window.addEventListener('deleteAllCookies', () => {
+    toast('Cookie banner: all cookies rejected', 'warn');
+    setTimeout(() => refresh(), 500);
+  });
+
   // Stay in sync with changes made outside the app (cookie manager SDK, DevTools…).
   window.addEventListener('focus', () => !busy && refresh());
   document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && !busy && refresh());

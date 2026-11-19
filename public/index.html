@@ -14,13 +14,26 @@
        No tenant ID, site ID or API URL is configured by this app.
        =================================================================== -->
 
+    <script async src="https://privasapien-dev-cookie-manager-v2.s3.ap-south-1.amazonaws.com/cookies-manager-v2/dev/latest/cookie-manager.js"></script>
+
   <script src="cookie-data.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <!-- Cookie banner mount point for a custom-element-based banner, e.g.
        <your-cookie-banner></your-cookie-banner>. Left empty on purpose. -->
-  <div id="cookie-banner-root" aria-live="polite"></div>
+    <div id="cookie-banner-root" aria-live="polite">
+    <cookie-banner id="my-cookie-banner"></cookie-banner>
+  </div>
+  <script>
+    customElements.whenDefined('cookie-banner').then(() => {
+      document.getElementById('my-cookie-banner').config = {
+        "tenantId": "610b7a9c-72ea-11f0-998f-3e3dd1ad87e5",
+        "siteId": "e2821a61-f326-45f4-93df-956a09a2dae7",
+        "apiUrl": "https://api.dev-v5.privasapien.com/cookies-api"
+      };
+    });
+  </script>
 
   <header class="topbar">
     <div class="wrap topbar-inner">
