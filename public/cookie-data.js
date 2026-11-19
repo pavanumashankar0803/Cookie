@@ -8,7 +8,7 @@
 })(typeof self !== 'undefined' ? self : this, function (nodeCrypto) {
   'use strict';
 
-  const CATEGORIES = ['Necessary', 'Functional', 'Analytics', 'Advertisement', 'Uncategorized'];
+  const CATEGORIES = ['Necessary', 'Functional', 'Performance', 'Analytics', 'Marketing', 'Advertisement', 'Targeting', 'Uncategorized'];
   const NAME_RE = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
   const MIN = 60e3, HOUR = 60 * MIN, DAY = 24 * HOUR;
@@ -61,6 +61,21 @@
     { name: 'campaign_tracker', category: 'Advertisement', expiry: '7d', flags: '', sameSite: 'Lax',
       gen: () => `${pick(['newsletter', 'google', 'linkedin', 'partner'])}.${pick(['spring_sale', 'q4_launch', 'retarget_v2'])}.${pick(['cpc', 'email', 'social'])}` },
 
+    { name: 'perf_page_load', category: 'Performance', expiry: '1d', flags: '', sameSite: 'Lax', gen: () => `${200 + (randBytes(1)[0] * 8)}ms.${pick(['fast', 'avg', 'slow'])}` },
+    { name: '_dd_s', category: 'Performance', expiry: '30m', flags: '', sameSite: 'Strict', gen: () => `rum=1&id=${uuid()}&created=${Date.now()}` },
+    { name: 'rum_session', category: 'Performance', expiry: 'session', flags: '', sameSite: 'Lax', gen: () => hex(20) },
+    { name: 'cdn_pop', category: 'Performance', expiry: '7d', flags: 's', sameSite: 'Lax', gen: () => pick(['BOM', 'MAA', 'BLR', 'SIN', 'FRA', 'IAD']) + '-' + digits(2) },
+
+    { name: 'hubspotutk', category: 'Marketing', expiry: '180d', flags: '', sameSite: 'Lax', gen: () => hex(32) },
+    { name: '_mkto_trk', category: 'Marketing', expiry: '1y', flags: '', sameSite: 'Lax', gen: () => `id:${digits(3)}-ABC-${digits(3)}&token:_mch-example.test-${Date.now()}-${digits(5)}` },
+    { name: 'mkt_campaign_ref', category: 'Marketing', expiry: '30d', flags: '', sameSite: 'Lax', gen: () => `${pick(['webinar', 'ebook', 'newsletter', 'event'])}_${pick(['2026q4', 'launch', 'nurture'])}` },
+    { name: 'email_optin_source', category: 'Marketing', expiry: '90d', flags: '', sameSite: 'Lax', gen: () => pick(['footer_form', 'popup', 'checkout', 'blog_cta']) },
+
+    { name: 'IDE', category: 'Targeting', expiry: '1y', flags: 's', sameSite: 'None', gen: () => `AHWqTU${b64url(40)}` },
+    { name: '_ttp', category: 'Targeting', expiry: '1y', flags: '', sameSite: 'Lax', gen: () => b64url(27) },
+    { name: 'personalization_id', category: 'Targeting', expiry: '1y', flags: 's', sameSite: 'None', gen: () => `v1_${b64url(22)}==` },
+    { name: 'audience_segment', category: 'Targeting', expiry: '30d', flags: '', sameSite: 'Lax', gen: () => pick(['tech_buyers', 'privacy_pros', 'smb_owners', 'returning_visitors']) },
+
     { name: 'random_tracker', category: 'Uncategorized', expiry: 'session', flags: '', sameSite: '', gen: () => hex(16) },
     { name: 'visitor_identifier', category: 'Uncategorized', expiry: '1y', flags: '', sameSite: 'Lax', gen: () => uuid() },
     { name: 'custom_tracking_id', category: 'Uncategorized', expiry: '30d', flags: 'sh', sameSite: 'None', gen: () => `ctid-${Date.now().toString(36)}-${hex(8)}` },
@@ -71,6 +86,9 @@
     Functional: ['pref_', 'ui_', 'locale_', 'fn_'],
     Analytics: ['_an_', 'stat_', 'metrics_', '_pk_id_'],
     Advertisement: ['_ad_', 'retarget_', 'pixel_', 'adsrv_'],
+    Performance: ['perf_', 'rum_', 'lat_', 'cdn_'],
+    Marketing: ['mkt_', 'lead_', 'promo_', 'crm_'],
+    Targeting: ['tgt_', 'seg_', 'aud_', 'persona_'],
     Uncategorized: ['trk_', 'vid_', 'misc_', 'tmp_'],
   };
   const randomName = (category) => pick(NAME_PREFIX[category] || NAME_PREFIX.Uncategorized) + hex(6);
