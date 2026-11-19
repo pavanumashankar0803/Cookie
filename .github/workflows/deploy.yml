@@ -1,0 +1,29 @@
+name: Check and deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  check-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Syntax check
+        run: |
+          node --check server.js
+          node --check public/app.js
+          node --check public/cookie-data.js
+          node -e "JSON.parse(require('fs').readFileSync('site-cookies.json','utf8'))"
+      - name: Smoke test
+        run: |
+          PORT=3000 node server.js & sleep 2
+          test "$(curl -s -D - -o /dev/null http://localhost:3000/ | grep -ci set-cookie)" -gt 0
+      # Optional: trigger the host's deploy hook (Render: Settings > Deploy Hook).
+      # Add it as a repository secret named DEPLOY_HOOK_URL. Not needed if the host auto-deploys on push.
+      - name: Trigger deploy
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        if: env.DEPLOY_HOOK_URL != ''
+        run: curl -fsS -X POST "$DEPLOY_HOOK_URL"
