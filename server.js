@@ -85,15 +85,6 @@ function authorized(req) {
   return given.length === want.length && crypto.timingSafeEqual(given, want);
 }
 
-/** Set-Cookie headers for server-set profile cookies the browser doesn't have yet (or has a different value). */
-function profileHeaders(req) {
-  const secure = isSecureContext(req);
-  const have = new Map(CTP.parseCookieHeader(req.headers.cookie).map((c) => [c.name, c.value]));
-  return profile
-    .filter((e) => e.setBy === 'server' && have.get(e.name) !== encodeURIComponent(e.value))
-    .map((e) => CTP.serialize(CTP.effective(e, secure)));
-}
-
 // ------------------------------------------------------------------ API
 async function handleApi(req, res, pathname) {
   const secure = isSecureContext(req);
@@ -160,18 +151,13 @@ async function handleApi(req, res, pathname) {
 function serveStatic(req, res, pathname) {
   let urlPath = decodeURIComponent(pathname);
   const isPage = urlPath === '/' || !path.extname(urlPath) || urlPath.endsWith('.html');
-  if (isPage) urlPath = '/index.html'; // every page path serves the app (lets you test Path= cookies)
-  let file = path.normalize(path.join(PUBLIC_DIR, urlPath));
-  if (!file.startsWith(PUBLIC_DIR)) { res.writeHead(403); return res.end('Forbidden'); }
-  if (!fs.existsSync(file)) file = path.join(PUBLIC_DIR, path.basename(file)); // asset requested from a sub-path page
+  let file = isPage ? path.join(__dirname, 'test.html') : path.normalize(path.join(PUBLIC_DIR, urlPath));
+  if (!isPage && !file.startsWith(PUBLIC_DIR)) { res.writeHead(403); return res.end('Forbidden'); }
+  if (!isPage && !fs.existsSync(file)) file = path.join(PUBLIC_DIR, path.basename(file)); // asset requested from a sub-path page
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found'); }
     const headers = { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff' };
-    if (isPage) {
-      headers['Cache-Control'] = 'no-store';
-      const sc = profileHeaders(req);
-      if (sc.length) headers['Set-Cookie'] = sc;
-    }
+    if (isPage) headers['Cache-Control'] = 'no-store';
     res.writeHead(200, headers);
     res.end(req.method === 'HEAD' ? undefined : data);
   });
