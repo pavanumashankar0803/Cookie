@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cookie Manager SDK Integration</title>
+
+  <!--
+    V2 SDK registration. Use .js.br only when your host serves it with
+    Content-Encoding: br; otherwise use the .js URL.
+  -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    // The SDK emits these events when the visitor saves or rejects consent.
+    window.addEventListener('saveCookies', (event) => {
+      console.log('Cookie preferences saved:', event.detail);
+      // Initialize or update consent-gated services here, if needed.
+    });
+
+    window.addEventListener('deleteAllCookies', () => {
+      console.log('Visitor rejected cookies.');
+      // Clean up non-essential services here, if needed.
+    });
+
+    // The SDK pushes privasapien_consent_update to window.dataLayer.
+    // Do not push a duplicate event here. In GTM, use
+    // privasapien_consent_applied as a Custom Event trigger for consent-gated
+    // tags, configured to fire once per event.
+  </script>
+  <script async src="https://privasapien-dev-cookie-manager-v2.s3.ap-south-1.amazonaws.com/cookies-manager-v2/dev/latest/cookie-manager.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Cookie Manager SDK Integration</h1>
+    <p>This page demonstrates the v2 cookie banner integration.</p>
+    <div id="cookie-banner-root" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const cookieManagerConfig = {
+      // Replace these development values with the values for your site.
+      tenantId: '610b7a9c-72ea-11f0-998f-3e3dd1ad87e5',
+      siteId: 'e2821a61-f326-45f4-93df-956a09a2dae7',
+      apiUrl: 'https://api.dev-v5.privasapien.com/cookies-api'
+    };
+
+    // Wait until the custom element is registered, then configure it before
+    // adding it to the page.
+    customElements.whenDefined('cookie-banner').then(() => {
+      const banner = document.createElement('cookie-banner');
+      banner.id = 'cookie-banner';
+      banner.config = cookieManagerConfig;
+      document.getElementById('cookie-banner-root').appendChild(banner);
+    });
+
+    // Alternative 1 — configure through a JSON attribute instead:
+    // <cookie-banner config='{"tenantId":"...","siteId":"...","apiUrl":"..."}'></cookie-banner>
+    //
+    // Alternative 2 — use localStorage instead of the config property above.
+    // Set all three values before the banner is initialized:
+    // localStorage.setItem('tenantId', 'YOUR_TENANT_ID');
+    // localStorage.setItem('siteId', 'YOUR_SITE_ID');
+    // localStorage.setItem('apiUrl', 'YOUR_API_URL');
+    //
+    // Use only one configuration method; do not combine the alternatives
+    // with the active JavaScript configuration above.
+    //
+    // Optional: inspect the latest consent state after the SDK has applied it:
+    // if (window.consentiumEvents) {
+    //   const { event, eventDetail } = window.consentiumEvents;
+    //   console.log('Current consent state:', event, eventDetail);
+    // }
+  </script>
+
+  <!--
+    Legacy integration — use this instead of the v2 SDK only when required:
+    <script async src="https://consentium.s3.us-east-1.amazonaws.com/610b7a9c-72ea-11f0-998f-3e3dd1ad87e5/scripts/e2821a61-f326-45f4-93df-956a09a2dae7.js"></script>
+  -->
+</body>
+</html>
