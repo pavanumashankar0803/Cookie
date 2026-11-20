@@ -1,18 +1,8 @@
-# Render Blueprint: New > Blueprint > pick this repo. Gives you https://<name>.onrender.com
+# Render Blueprint: New > Blueprint > pick this repo.
 services:
   - type: web
     name: cookie-testing-playground
-    runtime: node
-    plan: free            # free: sleeps after 15 min idle, profile edits reset on restart (see README)
-    buildCommand: "true"  # no dependencies
-    startCommand: node server.js
-    healthCheckPath: /healthz
+    runtime: static
+    buildCommand: "mkdir -p dist && cp test.html dist/index.html && cp test.html dist/test.html"
+    staticPublishPath: dist
     autoDeploy: true
-    envVars:
-      - key: TRUST_PROXY
-        value: "1"
-      - key: ADMIN_TOKEN   # protects the site profile from strangers; Render generates a value
-        generateValue: true
-    # Paid plan only, to keep edits across restarts:
-    # disk: { name: data, mountPath: /var/data, sizeGB: 1 }
-    # and add envVar PROFILE_FILE=/var/data/profile.json
