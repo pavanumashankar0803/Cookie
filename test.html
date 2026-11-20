@@ -34,6 +34,7 @@
   <main>
     <h1>Cookie Manager SDK Integration</h1>
     <p>This page demonstrates the v2 cookie banner integration.</p>
+    <p>A sample first-party locale preference is stored as one cookie: <code>site_locale=en-US</code>.</p>
     <div id="cookie-banner-root" aria-live="polite"></div>
   </main>
 
@@ -71,6 +72,17 @@
     //   const { event, eventDetail } = window.consentiumEvents;
     //   console.log('Current consent state:', event, eventDetail);
     // }
+  </script>
+
+  <script>
+    const sampleCookie = [
+      'site_locale=en-US',
+      'Max-Age=31536000',
+      'Path=/',
+      'SameSite=Lax'
+    ];
+    if (location.protocol === 'https:') sampleCookie.push('Secure');
+    document.cookie = sampleCookie.join('; ');
   </script>
 
   <!--
